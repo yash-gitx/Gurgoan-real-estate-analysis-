@@ -6,22 +6,17 @@ df = pd.read_csv("data.csv")
 
 # Data Cleaning
 df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
-# print(df.columns.to_list())
-# df = df.drop_duplicates()
 
 # Numeric columns cleaning
 df["price"] = df["price"].astype(str).str.replace(",", "").astype(float) 
 df["rate_per_sqft"] = df["rate_per_sqft"].astype(str).str.replace(",", "").astype(int) 
 df['bhk_count'] = df['bhk_count'].astype(int)
-# print(df.info())
 
 # Categorial column cleaning
 df['status'] = df['status'].str.strip().str.lower()
 df['rera_approval'] = df['rera_approval'].str.strip().str.lower().map({'approved by rera' : True, 'not approved by rera' : False})
 df['flat_type'] = df['flat_type'].str.strip().str.lower()
 df = df.drop_duplicates()
-# print(df.info())
-
 
 # Q1: Which is the costliest flat in DS
 costliest_flat = df.loc[df['price'].idxmax()]
@@ -43,6 +38,7 @@ flat_type                               apartment
 print(f"The costliest flat in DS is a {costliest_flat['bhk_count']} BHK apartment located in {costliest_flat['locality']} with a price of {costliest_flat['price'] / 10000000} crores. It is currently {costliest_flat['status']} and has a rate per sqft of {costliest_flat['rate_per_sqft']}. The builder is {costliest_flat['builder_name']} and it is {'approved by RERA' if costliest_flat['rera_approval'] else 'not approved by RERA'}.")
 
 # Q2: Which locality has highest average price?
+
 highest_avgprice_locality = df.groupby('locality')['price'].mean().idxmax()
 print(f"The locality with the highest average price is {highest_avgprice_locality}.")
 
@@ -62,6 +58,7 @@ else:
     print(f"No, under-construction properties cost more on average than ready-to-move properties.")
 
 # Q5: Do RERA-approved properties command a price premium?
+
 rera_approved_avg_price = df[df['rera_approval'] == True]['price'].mean()
 rera_not_approved_avg_price = df[df['rera_approval'] == False]['price'].mean()
 
@@ -71,17 +68,29 @@ else:
     print(f"No, RERA-approved properties do not command a price premium on average.")
 
 # Q6: How does area(sqft) impact property price?
+
 sns.scatterplot(data=df, x='area', y='price')
-# plt.show()
+plt.show()
 
 # Q7: Which BHK configuraion is most expensive?
 
 most_exp_bhk_config = df.groupby('bhk_count')['rate_per_sqft'].mean().idxmax()
 print(f"The most expensive BHK configuration is {most_exp_bhk_config} BHK.")
 
-# Q8: Which property type is the costliest
+# Q8: Which property type is the costliest?
 
 costliest_property_type = df.groupby('flat_type')['rate_per_sqft'].mean().idxmax()
 print(f"The costliest property type is a {costliest_property_type}")
 
-# Q9: Do certian builders price higer
+# Q9: Do certian builders price higher?
+
+top_5_builders = df.groupby('company_name')['rate_per_sqft'].mean().sort_values(ascending=False).head(5)
+
+print("Top 5 builders are:", end=" ")
+for builder in top_5_builders.index:
+    print(builder, end=", ")
+
+# Q10: are larger homes more expensive per sqft?
+
+sns.scatterplot(data=df, x='area', y='rate_per_sqft')
+plt.show()
